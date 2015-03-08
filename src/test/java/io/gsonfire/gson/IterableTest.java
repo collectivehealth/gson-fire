@@ -1,8 +1,10 @@
 package io.gsonfire.gson;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import io.gsonfire.GsonFireBuilder;
+import io.gsonfire.TypeSelector;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -54,19 +56,20 @@ public class IterableTest {
             .createGsonBuilder()
             .create();
 
-        Iterable iterable = new GenericIterable(new StringContainer("a"), new StringContainer("b"));
+        Iterable iterable = new GenericIterable(new StringContainer("a"), new StringContainerSubClass("b"));
         String json = gson.toJson(iterable);
-        assertEquals("[{\"value\":\"a\"},{\"value\":\"b\"}]", json);
+        assertEquals("[{\"value\":\"a\"},{\"value_sub\":\"b_sub\",\"value\":\"b\"}]", json);
     }
 
     @Test
     public void testDeserializeObjects() {
         Gson gson = new GsonFireBuilder()
             .enableIterableSupport()
+            .registerTypeSelector(StringContainer.class, new StringContainerTypeSelector())
             .createGsonBuilder()
             .create();
 
-        String json = "[{\"value\":\"a\"},{\"value\":\"b\"}]";
+        String json = "[{\"value\":\"a\"},{\"value_sub\":\"b_sub\",\"value\":\"b\"}]";
         Iterable<StringContainer> iterable = gson.fromJson(json, new TypeToken<Iterable<StringContainer>>(){}.getType());
 
         LinkedHashSet<StringContainer> result = new LinkedHashSet<StringContainer>();
@@ -74,7 +77,7 @@ public class IterableTest {
             result.add(s);
         }
 
-        LinkedHashSet<StringContainer> expected = new LinkedHashSet<StringContainer>(Arrays.asList(new StringContainer("a"), new StringContainer("b")));
+        LinkedHashSet<StringContainer> expected = new LinkedHashSet<StringContainer>(Arrays.asList(new StringContainer("a"), new StringContainerSubClass("b")));
         assertEquals(expected, result);
     }
 
@@ -115,6 +118,47 @@ public class IterableTest {
         @Override
         public int hashCode() {
             return value != null ? value.hashCode() : 0;
+        }
+    }
+
+    public class StringContainerSubClass extends StringContainer{
+
+        public final String value_sub;
+
+        public StringContainerSubClass(String value) {
+            super(value);
+            value_sub = value + "_sub";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            if (!super.equals(o)) return false;
+
+            StringContainerSubClass that = (StringContainerSubClass) o;
+
+            if (value_sub != null ? !value_sub.equals(that.value_sub) : that.value_sub != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = super.hashCode();
+            result = 31 * result + (value_sub != null ? value_sub.hashCode() : 0);
+            return result;
+        }
+    }
+
+    public class StringContainerTypeSelector implements TypeSelector<StringContainer> {
+        @Override
+        public Class<? extends StringContainer> getClassForElement(JsonElement readElement) {
+            if(readElement.getAsJsonObject().has("value_sub")) {
+                return StringContainerSubClass.class;
+            } else {
+                return StringContainer.class;
+            }
         }
     }
 
