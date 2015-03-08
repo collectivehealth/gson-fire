@@ -148,6 +148,10 @@ public class GsonFireBuilder {
         return this;
     }
 
+    /**
+     * Enables the serialization of {@link java.lang.Iterable classes that are not anonymous}
+     * @return
+     */
     public GsonFireBuilder enableIterableSupport() {
         this.iterableSupport = true;
         return this;
