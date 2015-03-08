@@ -1,6 +1,7 @@
 package io.gsonfire;
 
 import io.gsonfire.gson.FireTypeAdapterFactory;
+import io.gsonfire.gson.IterableTypeAdapterFactory;
 import io.gsonfire.postprocessors.MergeMapPostProcessor;
 import io.gsonfire.postprocessors.MethodInvokerPostProcessor;
 import com.google.gson.Gson;
@@ -18,6 +19,7 @@ public class GsonFireBuilder {
 
     private DateSerializationPolicy dateSerializationPolicy;
     private TimeZone serializeTimeZone = TimeZone.getDefault();
+    private boolean iterableSupport = false;
 
     private ClassConfig getClassConfig(Class clazz){
         ClassConfig result = classConfigMap.get(clazz);
@@ -146,6 +148,11 @@ public class GsonFireBuilder {
         return this;
     }
 
+    public GsonFireBuilder enableIterableSupport() {
+        this.iterableSupport = true;
+        return this;
+    }
+
     /**
      * Returns a new instance of the good old {@link GsonBuilder}
      * @return
@@ -160,6 +167,10 @@ public class GsonFireBuilder {
 
         if(dateSerializationPolicy != null){
             builder.registerTypeAdapter(Date.class, dateSerializationPolicy.createTypeAdapter(serializeTimeZone));
+        }
+
+        if(iterableSupport) {
+            builder.registerTypeAdapterFactory(new IterableTypeAdapterFactory());
         }
 
         return builder;
