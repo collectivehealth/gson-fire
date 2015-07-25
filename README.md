@@ -195,6 +195,11 @@ Gson gson = gsonBuilder.create()
 
 ## Release notes
 
+### 1.3.0
+
+- Adds the ability to exclude fields depending on its value
+- Optimized the way objects are explored with reflection
+
 ### 1.2.0
 
 - Adds non-anonymous ```Iterable``` called ```SimpleIterable``` that can be serialized and de-serialized.
@@ -229,7 +234,7 @@ Add to your ```pom.xml```
     <dependency>
       <groupId>io.gsonfire</groupId>
       <artifactId>gson-fire</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
     </dependency>
 </dependencies>
 ```
@@ -239,7 +244,7 @@ Add to your ```build.gradle```
 
 ```groovy
 dependencies {
-    compile 'io.gsonfire:gson-fire:1.2.0'
+    compile 'io.gsonfire:gson-fire:1.3.0'
 }
 ```
 
